@@ -1,36 +1,61 @@
 import { GiftedChat, Bubble } from "react-native-gifted-chat";
 import React, { useState, useEffect } from "react";
 import { StyleSheet, View, Text, KeyboardAvoidingView, Platform } from 'react-native';
+import { addDoc, collection, onSnapshot, query, orderBy } from "firebase/firestore";
 
-const Chat = ({ route, navigation }) => {
+
+
+const Chat = ({ route, navigation, db,isConnected, storage}) => {
   const [messages, setMessages] = useState([]);
-  const { name, backgroundColor } = route.params;
-
+  const { name, backgroundColor, id } = route.params;
+ 
+  
+  let unsubMessages;
   useEffect(() => {
-    navigation.setOptions({ title: name })
-    setMessages([
-        {
-          _id: 1,
-          text: 'Hello developer',
-          createdAt: new Date(),
-          user: {
-            _id: 2,
-            name: 'React Native',
-            avatar: 'https://placeimg.com/140/140/any',
-          },
-        },
-        {
-          _id: 2,
-          text: 'This is a system message',
-          createdAt: new Date(),
-          system: true,
-        },
-      ]);
-  }, [name, navigation]);
+    navigation.setOptions({ title: name });
 
-  const onSend = (newMessages = []) => {
-    setMessages((previousMessages) => GiftedChat.append(previousMessages, newMessages));
+    if (isConnected) {
+        if (unsubMessages) unsubMessages();
+        //unsubMessages = null;
+
+    const q = query(collection(db, "messages"), orderBy("createdAt", "desc"));
+    const unsubMessages = onSnapshot(q, (documentsSnapshot) => {
+      let newMessages = [];
+      documentsSnapshot.forEach(doc => {
+        newMessages.push({
+          id: doc.id,
+          ...doc.data(),
+          createdAt: new Date(doc.data().createdAt.toMillis()),
+        });
+      });
+      cacheMessages(newMessages);
+      setMessages(newMessages);
+    });
+} else loadCachedMessages();
+
+    return () => {
+      if (unsubMessages) unsubMessages();
+    };
+   }, [isConnected]);
+
+   const cacheMessages = async (messagesToCache) => {
+    try {
+      await AsyncStorage.setItem("messages", JSON.stringify(messagesToCache));
+    } catch (error) {
+      console.log(error.message);
+    }
   };
+ 
+  const loadCachedMessages = async () => {
+   
+    const cachedMessages = (await AsyncStorage.getItem("messages")) || [];
+    setMessages(JSON.parse(cachedMessages));
+  };
+
+    const onSend = (newMessages) => {
+        addDoc(collection(db, "messages"), newMessages [0]);
+      };
+
   const renderBubble = (props) => {
     return (
     <Bubble
@@ -45,7 +70,7 @@ const Chat = ({ route, navigation }) => {
       }}
     />
     );
-  }
+  };
 
   return (
     <View style={[styles.container, { backgroundColor }]}>
@@ -54,7 +79,7 @@ const Chat = ({ route, navigation }) => {
         renderBubble={renderBubble}
         onSend={(messages) => onSend(messages)}
         user={{
-          _id: 1,
+          _id: route.params.id,
           name
         }}
       />
