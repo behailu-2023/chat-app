@@ -6,8 +6,9 @@ import Chat from './components/Chat';
 import { initializeApp } from "firebase/app";
 import { getFirestore, disableNetwork,enableNetwork } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
-import { LogBox } from 'react-native';
+import { LogBox, Alert } from 'react-native';
 import { useNetInfo } from '@react-native-community/netinfo';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 LogBox.ignoreLogs(["AsyncStorage has been extracted from"]);

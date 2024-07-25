@@ -1,7 +1,8 @@
-import { GiftedChat, Bubble } from "react-native-gifted-chat";
+import { GiftedChat, Bubble, InputToolbar } from "react-native-gifted-chat";
 import React, { useState, useEffect } from "react";
 import { StyleSheet, View, Text, KeyboardAvoidingView, Platform } from 'react-native';
 import { addDoc, collection, onSnapshot, query, orderBy } from "firebase/firestore";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 
@@ -23,8 +24,7 @@ const Chat = ({ route, navigation, db,isConnected, storage}) => {
       let newMessages = [];
       documentsSnapshot.forEach(doc => {
         newMessages.push({
-          id: doc.id,
-          ...doc.data(),
+          id: doc.id, ...doc.data(),
           createdAt: new Date(doc.data().createdAt.toMillis()),
         });
       });
@@ -47,7 +47,6 @@ const Chat = ({ route, navigation, db,isConnected, storage}) => {
   };
  
   const loadCachedMessages = async () => {
-   
     const cachedMessages = (await AsyncStorage.getItem("messages")) || [];
     setMessages(JSON.parse(cachedMessages));
   };
@@ -71,6 +70,10 @@ const Chat = ({ route, navigation, db,isConnected, storage}) => {
     />
     );
   };
+  const renderInputToolbar = (props) => {
+    if (isConnected === true) return <InputToolbar {...props} />;
+    else return null;
+  }
 
   return (
     <View style={[styles.container, { backgroundColor }]}>
@@ -78,6 +81,7 @@ const Chat = ({ route, navigation, db,isConnected, storage}) => {
         messages={messages}
         renderBubble={renderBubble}
         onSend={(messages) => onSend(messages)}
+        enderInputToolbar={renderInputToolbar}
         user={{
           _id: route.params.id,
           name
