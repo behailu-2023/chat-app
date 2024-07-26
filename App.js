@@ -8,7 +8,7 @@ import { getFirestore, disableNetwork,enableNetwork } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { LogBox, Alert } from 'react-native';
 import { useNetInfo } from '@react-native-community/netinfo';
-import AsyncStorage from "@react-native-async-storage/async-storage";
+
 
 
 LogBox.ignoreLogs(["AsyncStorage has been extracted from"]);
