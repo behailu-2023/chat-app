@@ -10,18 +10,23 @@ const Chat = ({ route, navigation, db,isConnected, storage}) => {
   const [messages, setMessages] = useState([]);
   const { name, backgroundColor, id } = route.params;
  
-  
+  // useEffect hook to set messages options
   let unsubMessages;
   useEffect(() => {
     navigation.setOptions({ title: name });
 
     if (isConnected) {
+        // unregister current onSnapshot() listener to avoid registering multiple listeners when
+      // useEffect code is re-executed.
         if (unsubMessages) unsubMessages();
         //unsubMessages = null;
 
+       // Create a query to get the "messages" collection from the Firestore database
     const q = query(collection(db, "messages"), orderBy("createdAt", "desc"));
+       // This function will be called whenever there are changes in the collection.
     const unsubMessages = onSnapshot(q, (documentsSnapshot) => {
       let newMessages = [];
+        // Iterate through each document in the snapshot
       documentsSnapshot.forEach(doc => {
         newMessages.push({
           id: doc.id, ...doc.data(),
@@ -32,7 +37,7 @@ const Chat = ({ route, navigation, db,isConnected, storage}) => {
       setMessages(newMessages);
     });
 } else loadCachedMessages();
-
+       // Clean up code
     return () => {
       if (unsubMessages) unsubMessages();
     };
@@ -45,8 +50,9 @@ const Chat = ({ route, navigation, db,isConnected, storage}) => {
       console.log(error.message);
     }
   };
- 
+    // Call this function when isConnected prop turns out to be false in useEffect()
   const loadCachedMessages = async () => {
+    // The empty array is for cachedMessages in case AsyncStorage() fails when the messages item hasn’t been set yet in AsyncStorage.
     const cachedMessages = (await AsyncStorage.getItem("messages")) || [];
     setMessages(JSON.parse(cachedMessages));
   };

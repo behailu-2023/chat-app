@@ -3,6 +3,8 @@ import { ImageBackground, StyleSheet, View, Text, TextInput, Button, Image, Touc
 import { getAuth, signInAnonymously } from "firebase/auth";
 
 
+
+// Define the Start component
 const Start = ({ navigation }) => {
 
   const [name, setName] = useState('');
@@ -12,7 +14,7 @@ const Start = ({ navigation }) => {
 
 
   const auth = getAuth();
-
+  // handle the sign-in anonymously process for the user.
   const signInUser = () => {
     signInAnonymously(auth)
     .then( result => {

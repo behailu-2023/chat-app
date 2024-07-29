@@ -15,8 +15,9 @@ LogBox.ignoreLogs(["AsyncStorage has been extracted from"]);
 const Stack = createNativeStackNavigator();
 
 const App = () => {
+   // Define a new state that represents the network connectivity status
   const connectionStatus = useNetInfo();
-
+  // useEffect to display an alert popup if no internet connection
   useEffect(() => {
     if (connectionStatus.isConnected === false) {
       Alert.alert("Connection lost!");
@@ -44,10 +45,6 @@ const db = getFirestore(app);
 
 // Initialize Firebase Storage handler
 const storage = getStorage(app);
-
-
-  
-
 
   return (
     <NavigationContainer>
